@@ -1,66 +1,646 @@
-. 
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Meu Personagem</title>
+  <title>RPG — Meu Personagem</title>
+  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel:wght@400;700&family=Crimson+Text:ital@0;1&display=swap" rel="stylesheet">
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
-      background: #1a1a2e;
+      background: #0a0a0f;
+      font-family: 'Crimson Text', serif;
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      margin: 0;
-      font-family: Arial, sans-serif;
+      overflow: hidden;
     }
 
-    .ficha {
-      background: #16213e;
-      border: 2px solid #4f8eff;
-      border-radius: 12px;
-      padding: 2rem;
-      color: white;
+    /* FUNDO ANIMADO */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: 
+        radial-gradient(ellipse at 20% 50%, #1a0533 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 50%, #001a33 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 100%, #1a0a00 0%, transparent 50%);
+      z-index: 0;
+    }
+
+    .tela {
+      display: none;
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 480px;
+      padding: 1rem;
+    }
+    .tela.ativa { display: block; }
+
+    /* CARD BASE */
+    .card {
+      background: linear-gradient(145deg, #12101a, #1a1428);
+      border: 1px solid #4f3a7a;
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      color: #e8d9c0;
       text-align: center;
-      width: 300px;
+      box-shadow: 0 0 60px #2a1a4a88, inset 0 1px 0 #6a4a9a44;
     }
 
-    .avatar {
+    h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #c9a84c;
+      text-shadow: 0 0 20px #c9a84c88;
+      margin-bottom: 0.3rem;
+      letter-spacing: 0.05em;
+    }
+
+    .subtitulo {
+      font-style: italic;
+      color: #8a7a6a;
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+    }
+
+    /* LOGIN */
+    .campo-nome {
+      background: #0a0812;
+      border: 1px solid #4f3a7a;
+      border-radius: 8px;
+      padding: 0.9rem 1.2rem;
+      color: #e8d9c0;
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      width: 100%;
+      margin-bottom: 1.2rem;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .campo-nome:focus {
+      border-color: #c9a84c;
+      box-shadow: 0 0 15px #c9a84c44;
+    }
+    .campo-nome::placeholder { color: #4a3a5a; }
+
+    .escolha-classe {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.7rem;
+      margin-bottom: 1.5rem;
+    }
+    .classe-btn {
+      background: #0a0812;
+      border: 1px solid #4f3a7a;
+      border-radius: 8px;
+      padding: 0.8rem 0.3rem;
+      color: #8a7a6a;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Crimson Text', serif;
+      font-size: 0.85rem;
+    }
+    .classe-btn .icon { font-size: 1.8rem; display: block; margin-bottom: 0.3rem; }
+    .classe-btn:hover, .classe-btn.selecionado {
+      border-color: #c9a84c;
+      color: #c9a84c;
+      box-shadow: 0 0 15px #c9a84c33;
+      background: #1a1520;
+    }
+
+    /* BOTÃO */
+    .btn {
+      background: linear-gradient(135deg, #7a3a2a, #c9a84c);
+      border: none;
+      color: #0a0812;
+      font-family: 'Cinzel', serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      padding: 0.9rem 2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      letter-spacing: 0.1em;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px #c9a84c44; }
+    .btn:active { transform: translateY(0); }
+    .btn.secundario {
+      background: transparent;
+      border: 1px solid #4f3a7a;
+      color: #8a7a6a;
+      margin-top: 0.7rem;
+    }
+    .btn.secundario:hover { border-color: #c9a84c; color: #c9a84c; }
+
+    /* FICHA */
+    .avatar-grande {
       font-size: 5rem;
-      margin-bottom: 1rem;
-    }
-
-    h1 { color: #4f8eff; margin: 0 0 0.5rem; }
-
-    .nivel {
-      background: #4f8eff;
-      border-radius: 20px;
-      padding: 0.3rem 1rem;
-      display: inline-block;
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
-    }
-
-    .habilidades { text-align: left; margin-top: 1rem; }
-    .habilidade {
-      background: #0f3460;
-      border-radius: 6px;
-      padding: 0.5rem 1rem;
+      display: block;
       margin-bottom: 0.5rem;
+      filter: drop-shadow(0 0 20px #c9a84c);
+      animation: flutuar 3s ease-in-out infinite;
+    }
+    @keyframes flutuar {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .nome-personagem {
+      font-family: 'Cinzel', serif;
+      font-size: 1.5rem;
+      color: #c9a84c;
+      text-shadow: 0 0 15px #c9a84c66;
+    }
+
+    .barra-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #8a7a6a;
+      margin-bottom: 0.3rem;
+      margin-top: 0.8rem;
+    }
+    .barra-bg {
+      background: #0a0812;
+      border-radius: 10px;
+      height: 12px;
+      border: 1px solid #2a1a4a;
+      overflow: hidden;
+    }
+    .barra-fill {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.6s ease;
+    }
+    .barra-vida-fill { background: linear-gradient(90deg, #8b0000, #dc143c); }
+    .barra-mana-fill { background: linear-gradient(90deg, #00008b, #4169e1); }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.5rem;
+      margin: 1.2rem 0;
+    }
+    .stat {
+      background: #0a0812;
+      border: 1px solid #2a1a4a;
+      border-radius: 8px;
+      padding: 0.6rem;
+      font-size: 0.8rem;
+      color: #8a7a6a;
+    }
+    .stat strong { display: block; color: #c9a84c; font-size: 1.1rem; }
+
+    /* BATALHA */
+    .arena {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .lutador { text-align: center; }
+    .lutador .icon { font-size: 3.5rem; display: block; }
+    .lutador .nome { font-family: 'Cinzel', serif; font-size: 0.85rem; color: #c9a84c; margin: 0.3rem 0; }
+    .vs { font-family: 'Cinzel', serif; font-size: 1.3rem; color: #4f3a7a; }
+
+    .habilidades {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+    }
+    .hab-btn {
+      background: #0a0812;
+      border: 1px solid #4f3a7a;
+      border-radius: 8px;
+      padding: 0.7rem;
+      color: #e8d9c0;
+      cursor: pointer;
+      font-family: 'Crimson Text', serif;
       font-size: 0.9rem;
+      transition: all 0.2s;
+      text-align: left;
+    }
+    .hab-btn:hover:not(:disabled) { border-color: #c9a84c; background: #1a1520; }
+    .hab-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .hab-btn .hab-icon { font-size: 1.2rem; margin-right: 0.3rem; }
+    .hab-custo { font-size: 0.7rem; color: #4169e1; display: block; margin-top: 0.2rem; }
+
+    .log-batalha {
+      background: #0a0812;
+      border: 1px solid #2a1a4a;
+      border-radius: 8px;
+      padding: 0.8rem 1rem;
+      font-size: 0.88rem;
+      color: #8a7a6a;
+      min-height: 60px;
+      margin-bottom: 1rem;
+      font-style: italic;
+      line-height: 1.6;
+    }
+
+    .turno-info {
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      color: #4f3a7a;
+      margin-bottom: 1rem;
+      letter-spacing: 0.1em;
+    }
+
+    /* ANIMAÇÃO DE DANO */
+    .dano-texto {
+      position: fixed;
+      font-family: 'Cinzel', serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      pointer-events: none;
+      z-index: 999;
+      animation: subirSumur 1.2s forwards;
+    }
+    @keyframes subirSumur {
+      0%   { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-80px) scale(1.4); }
     }
   </style>
 </head>
 <body>
-  <div class="ficha">
-    <div class="avatar">🧙</div>
-    <h1>Matheus</h1>
-    <div class="nivel">⭐ Nível 1</div>
-    <div class="habilidades">
-      <div class="habilidade">🔥 Bola de Fogo</div>
-      <div class="habilidade">⚡ Raio</div>
-      <div class="habilidade">🛡️ Escudo Mágico</div>
+
+<!-- TELA 1: LOGIN -->
+<div class="tela ativa" id="tela-login">
+  <div class="card">
+    <h1>⚔️ Realm of Code</h1>
+    <p class="subtitulo">Forja teu destino, aventureiro</p>
+
+    <input class="campo-nome" type="text" id="input-nome" placeholder="Nome do seu herói..." maxlength="20">
+
+    <div class="escolha-classe">
+      <div class="classe-btn selecionado" onclick="selecionarClasse(this, 'mago')" id="classe-mago">
+        <span class="icon">🧙</span>Mago
+      </div>
+      <div class="classe-btn" onclick="selecionarClasse(this, 'guerreiro')" id="classe-guerreiro">
+        <span class="icon">⚔️</span>Guerreiro
+      </div>
+      <div class="classe-btn" onclick="selecionarClasse(this, 'arqueiro')" id="classe-arqueiro">
+        <span class="icon">🏹</span>Arqueiro
+      </div>
     </div>
+
+    <button class="btn" onclick="entrar()">✦ ENTRAR NO REINO ✦</button>
   </div>
+</div>
+
+<!-- TELA 2: FICHA -->
+<div class="tela" id="tela-ficha">
+  <div class="card">
+    <span class="avatar-grande" id="avatar-ficha">🧙</span>
+    <div class="nome-personagem" id="nome-ficha">Herói</div>
+    <p class="subtitulo" id="classe-ficha">Mago das Sombras</p>
+
+    <div class="barra-label">
+      <span>❤️ Vida</span><span id="vida-txt-ficha">100/100</span>
+    </div>
+    <div class="barra-bg">
+      <div class="barra-fill barra-vida-fill" id="vida-barra-ficha" style="width:100%"></div>
+    </div>
+
+    <div class="barra-label">
+      <span>💧 Mana</span><span id="mana-txt-ficha">80/80</span>
+    </div>
+    <div class="barra-bg">
+      <div class="barra-fill barra-mana-fill" id="mana-barra-ficha" style="width:100%"></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><strong id="stat-atk">25</strong>Ataque</div>
+      <div class="stat"><strong id="stat-def">10</strong>Defesa</div>
+      <div class="stat"><strong id="stat-vel">15</strong>Velocidade</div>
+    </div>
+
+    <button class="btn" onclick="irParaBatalha()">⚔️ BATALHAR</button>
+    <button class="btn secundario" onclick="voltarLogin()">← Trocar Herói</button>
+  </div>
+</div>
+
+<!-- TELA 3: BATALHA -->
+<div class="tela" id="tela-batalha">
+  <div class="card">
+    <div class="turno-info" id="turno-info">— SEU TURNO —</div>
+
+    <div class="arena">
+      <div class="lutador">
+        <span class="icon" id="avatar-batalha">🧙</span>
+        <div class="nome" id="nome-batalha">Herói</div>
+        <div class="barra-bg" style="margin-top:0.4rem">
+          <div class="barra-fill barra-vida-fill" id="vida-jogador" style="width:100%"></div>
+        </div>
+        <div style="font-size:0.7rem;color:#8a7a6a;margin-top:0.2rem" id="vida-jogador-txt">100/100</div>
+      </div>
+      <div class="vs">VS</div>
+      <div class="lutador">
+        <span class="icon" id="avatar-inimigo">👹</span>
+        <div class="nome" id="nome-inimigo">Goblin</div>
+        <div class="barra-bg" style="margin-top:0.4rem">
+          <div class="barra-fill barra-vida-fill" id="vida-inimigo" style="width:100%"></div>
+        </div>
+        <div style="font-size:0.7rem;color:#8a7a6a;margin-top:0.2rem" id="vida-inimigo-txt">80/80</div>
+      </div>
+    </div>
+
+    <div class="log-batalha" id="log">A batalha começa! É seu turno, aventureiro...</div>
+
+    <div class="habilidades" id="habilidades-container"></div>
+
+    <button class="btn secundario" onclick="voltarFicha()">← Fugir da Batalha</button>
+  </div>
+</div>
+
+<script>
+  // ---- SONS ----
+  const AudioCtx = window.AudioContext || window.webkitAudioContext
+  let ctx
+
+  function getCtx() {
+    if (!ctx) ctx = new AudioCtx()
+    return ctx
+  }
+
+  function tocarSom(tipo) {
+    try {
+      const c = getCtx()
+      const osc = c.createOscillator()
+      const gain = c.createGain()
+      osc.connect(gain)
+      gain.connect(c.destination)
+
+      if (tipo === 'ataque') {
+        osc.type = 'sawtooth'
+        osc.frequency.setValueAtTime(400, c.currentTime)
+        osc.frequency.exponentialRampToValueAtTime(100, c.currentTime + 0.3)
+        gain.gain.setValueAtTime(0.3, c.currentTime)
+        gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.3)
+        osc.start(); osc.stop(c.currentTime + 0.3)
+      } else if (tipo === 'magia') {
+        osc.type = 'sine'
+        osc.frequency.setValueAtTime(600, c.currentTime)
+        osc.frequency.exponentialRampToValueAtTime(1200, c.currentTime + 0.2)
+        osc.frequency.exponentialRampToValueAtTime(800, c.currentTime + 0.4)
+        gain.gain.setValueAtTime(0.2, c.currentTime)
+        gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.4)
+        osc.start(); osc.stop(c.currentTime + 0.4)
+      } else if (tipo === 'dano') {
+        osc.type = 'square'
+        osc.frequency.setValueAtTime(200, c.currentTime)
+        osc.frequency.exponentialRampToValueAtTime(50, c.currentTime + 0.2)
+        gain.gain.setValueAtTime(0.2, c.currentTime)
+        gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.2)
+        osc.start(); osc.stop(c.currentTime + 0.2)
+      } else if (tipo === 'vitoria') {
+        const notas = [523, 659, 784, 1047]
+        notas.forEach((freq, i) => {
+          const o = c.createOscillator()
+          const g = c.createGain()
+          o.connect(g); g.connect(c.destination)
+          o.type = 'sine'
+          o.frequency.value = freq
+          g.gain.setValueAtTime(0.2, c.currentTime + i * 0.15)
+          g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + i * 0.15 + 0.3)
+          o.start(c.currentTime + i * 0.15)
+          o.stop(c.currentTime + i * 0.15 + 0.3)
+        })
+      }
+    } catch(e) {}
+  }
+
+  // ---- DADOS ----
+  const classes = {
+    mago:      { icon:'🧙', titulo:'Mago das Sombras', vida:80,  mana:120, atk:35, def:8,  vel:12,
+                 habs:[{nome:'Bola de Fogo',icon:'🔥',dano:[25,40],custo:20,som:'magia'},
+                       {nome:'Raio',icon:'⚡',dano:[15,25],custo:10,som:'magia'},
+                       {nome:'Meteoro',icon:'☄️',dano:[45,65],custo:40,som:'magia'},
+                       {nome:'Soco',icon:'👊',dano:[8,15],custo:0,som:'ataque'}] },
+    guerreiro: { icon:'⚔️', titulo:'Guerreiro do Caos', vida:130, mana:40,  atk:28, def:20, vel:8,
+                 habs:[{nome:'Espadada',icon:'⚔️',dano:[20,35],custo:0,som:'ataque'},
+                       {nome:'Fúria',icon:'😤',dano:[30,50],custo:15,som:'ataque'},
+                       {nome:'Escudo',icon:'🛡️',dano:[0,0],custo:10,som:'ataque',cura:20},
+                       {nome:'Golpe Final',icon:'💥',dano:[50,70],custo:30,som:'ataque'}] },
+    arqueiro:  { icon:'🏹', titulo:'Arqueiro das Sombras', vida:100, mana:70, atk:30, def:12, vel:20,
+                 habs:[{nome:'Flecha',icon:'🏹',dano:[18,28],custo:0,som:'ataque'},
+                       {nome:'Tiro Duplo',icon:'🎯',dano:[28,40],custo:15,som:'ataque'},
+                       {nome:'Veneno',icon:'🧪',dano:[20,30],custo:20,som:'magia'},
+                       {nome:'Chuva de Flechas',icon:'🌧️',dano:[40,60],custo:35,som:'ataque'}] }
+  }
+
+  const inimigos = [
+    { nome:'Goblin',    icon:'👹', vida:80,  atk:[8,18],  def:5  },
+    { nome:'Esqueleto', icon:'💀', vida:70,  atk:[12,22], def:8  },
+    { nome:'Orc',       icon:'👾', vida:110, atk:[15,28], def:12 },
+    { nome:'Dragão',    icon:'🐉', vida:150, atk:[20,35], def:15 }
+  ]
+
+  let estado = {
+    nome: '', classe: 'mago',
+    vidaMax:100, vida:100, manaMax:80, mana:80,
+    inimigo: null, vidaInimigo:0, vidaInimigoMax:0,
+    turnoJogador: true, emBatalha: false
+  }
+
+  // ---- LOGIN ----
+  function selecionarClasse(el, classe) {
+    document.querySelectorAll('.classe-btn').forEach(b => b.classList.remove('selecionado'))
+    el.classList.add('selecionado')
+    estado.classe = classe
+  }
+
+  function entrar() {
+    const nome = document.getElementById('input-nome').value.trim()
+    if (!nome) { document.getElementById('input-nome').placeholder = '⚠️ Digite um nome!'; return }
+
+    const c = classes[estado.classe]
+    estado.nome = nome
+    estado.vidaMax = c.vida; estado.vida = c.vida
+    estado.manaMax = c.mana; estado.mana = c.mana
+
+    document.getElementById('avatar-ficha').textContent = c.icon
+    document.getElementById('nome-ficha').textContent = nome
+    document.getElementById('classe-ficha').textContent = c.titulo
+    document.getElementById('vida-txt-ficha').textContent = c.vida+'/'+c.vida
+    document.getElementById('mana-txt-ficha').textContent = c.mana+'/'+c.mana
+    document.getElementById('stat-atk').textContent = c.atk
+    document.getElementById('stat-def').textContent = c.def
+    document.getElementById('stat-vel').textContent = c.vel
+
+    tocarSom('vitoria')
+    mudarTela('tela-ficha')
+  }
+
+  function voltarLogin() { mudarTela('tela-login') }
+
+  // ---- BATALHA ----
+  function irParaBatalha() {
+    const c = classes[estado.classe]
+    const ini = inimigos[Math.floor(Math.random() * inimigos.length)]
+
+    estado.inimigo = ini
+    estado.vidaInimigoMax = ini.vida
+    estado.vidaInimigo = ini.vida
+    estado.vida = estado.vidaMax
+    estado.mana = estado.manaMax
+    estado.turnoJogador = true
+    estado.emBatalha = true
+
+    document.getElementById('avatar-batalha').textContent = c.icon
+    document.getElementById('nome-batalha').textContent = estado.nome
+    document.getElementById('avatar-inimigo').textContent = ini.icon
+    document.getElementById('nome-inimigo').textContent = ini.nome
+    atualizarBarras()
+    document.getElementById('log').textContent = `${ini.icon} ${ini.nome} apareceu! É seu turno, ${estado.nome}!`
+    document.getElementById('turno-info').textContent = '— SEU TURNO —'
+
+    // montar habilidades
+    const cont = document.getElementById('habilidades-container')
+    cont.innerHTML = ''
+    c.habs.forEach((h, i) => {
+      const btn = document.createElement('button')
+      btn.className = 'hab-btn'
+      btn.id = 'hab-' + i
+      btn.innerHTML = `<span class="hab-icon">${h.icon}</span>${h.nome}<span class="hab-custo">${h.custo > 0 ? '💧 '+h.custo+' mana' : 'Sem custo'}</span>`
+      btn.onclick = () => usarHabilidade(i)
+      cont.appendChild(btn)
+    })
+
+    mudarTela('tela-batalha')
+  }
+
+  function usarHabilidade(idx) {
+    if (!estado.turnoJogador || !estado.emBatalha) return
+    const hab = classes[estado.classe].habs[idx]
+
+    if (estado.mana < hab.custo) {
+      document.getElementById('log').textContent = `😓 Mana insuficiente para ${hab.nome}!`
+      return
+    }
+
+    estado.mana -= hab.custo
+    let dano = 0
+    let log = ''
+
+    if (hab.cura) {
+      estado.vida = Math.min(estado.vidaMax, estado.vida + hab.cura)
+      log = `🛡️ Você usou ${hab.nome} e recuperou ${hab.cura} de vida!`
+      tocarSom('magia')
+      mostrarDanoTexto('+'+hab.cura, '#4fffb0', true)
+    } else {
+      dano = Math.floor(Math.random() * (hab.dano[1] - hab.dano[0] + 1)) + hab.dano[0]
+      const critico = Math.random() < 0.15
+      if (critico) { dano = Math.floor(dano * 1.8); }
+      estado.vidaInimigo = Math.max(0, estado.vidaInimigo - dano)
+      log = critico
+        ? `💥 CRÍTICO! ${hab.icon} ${hab.nome} causou ${dano} de dano!`
+        : `${hab.icon} ${hab.nome} causou ${dano} de dano no ${estado.inimigo.nome}!`
+      tocarSom(hab.som)
+      mostrarDanoTexto('-'+dano, '#ff4f4f', false)
+    }
+
+    atualizarBarras()
+    document.getElementById('log').textContent = log
+    desabilitarHabs(true)
+
+    if (estado.vidaInimigo <= 0) { setTimeout(vitoria, 800); return }
+
+    estado.turnoJogador = false
+    document.getElementById('turno-info').textContent = `— TURNO DO ${estado.inimigo.nome.toUpperCase()} —`
+    setTimeout(turnoInimigo, 1400)
+  }
+
+  function turnoInimigo() {
+    if (!estado.emBatalha) return
+    const ini = estado.inimigo
+    const dano = Math.max(0, Math.floor(Math.random() * (ini.atk[1] - ini.atk[0] + 1)) + ini.atk[0] - classes[estado.classe].def)
+    estado.vida = Math.max(0, estado.vida - dano)
+
+    tocarSom('dano')
+    mostrarDanoTexto('-'+dano, '#ff8c4f', true)
+    atualizarBarras()
+    document.getElementById('log').textContent = `${ini.icon} ${ini.nome} atacou e causou ${dano} de dano em você!`
+
+    if (estado.vida <= 0) { setTimeout(derrota, 800); return }
+
+    estado.turnoJogador = true
+    estado.mana = Math.min(estado.manaMax, estado.mana + 8)
+    document.getElementById('turno-info').textContent = '— SEU TURNO —'
+    desabilitarHabs(false)
+    atualizarBarras()
+  }
+
+  function vitoria() {
+    estado.emBatalha = false
+    tocarSom('vitoria')
+    document.getElementById('log').textContent = `🏆 Você venceu o ${estado.inimigo.nome}! Glória eterna!`
+    document.getElementById('turno-info').textContent = '— VITÓRIA! —'
+    desabilitarHabs(true)
+  }
+
+  function derrota() {
+    estado.emBatalha = false
+    document.getElementById('log').textContent = `💀 Você foi derrotado pelo ${estado.inimigo.nome}... mas lendas nunca morrem.`
+    document.getElementById('turno-info').textContent = '— DERROTA —'
+    desabilitarHabs(true)
+  }
+
+  function atualizarBarras() {
+    const vj = (estado.vida / estado.vidaMax) * 100
+    const vi = (estado.vidaInimigo / estado.vidaInimigoMax) * 100
+    const mj = (estado.mana / estado.manaMax) * 100
+
+    document.getElementById('vida-jogador').style.width = vj + '%'
+    document.getElementById('vida-inimigo').style.width = vi + '%'
+    document.getElementById('vida-jogador-txt').textContent = estado.vida+'/'+estado.vidaMax
+    document.getElementById('vida-inimigo-txt').textContent = estado.vidaInimigo+'/'+estado.vidaInimigoMax
+
+    // atualizar mana na ficha de batalha (via habs desabilitados)
+    classes[estado.classe].habs.forEach((h, i) => {
+      const btn = document.getElementById('hab-' + i)
+      if (btn && estado.turnoJogador) {
+        btn.disabled = estado.mana < h.custo
+      }
+    })
+  }
+
+  function desabilitarHabs(sim) {
+    classes[estado.classe].habs.forEach((_, i) => {
+      const btn = document.getElementById('hab-' + i)
+      if (btn) btn.disabled = sim
+    })
+  }
+
+  function mostrarDanoTexto(texto, cor, esquerda) {
+    const el = document.createElement('div')
+    el.className = 'dano-texto'
+    el.textContent = texto
+    el.style.color = cor
+    el.style.left = esquerda ? '20%' : '60%'
+    el.style.top = '40%'
+    document.body.appendChild(el)
+    setTimeout(() => el.remove(), 1200)
+  }
+
+  function voltarFicha() {
+    estado.emBatalha = false
+    mudarTela('tela-ficha')
+  }
+
+  function mudarTela(id) {
+    document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'))
+    document.getElementById(id).classList.add('ativa')
+  }
+</script>
 </body>
 </html>
